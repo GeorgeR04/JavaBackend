@@ -32,10 +32,10 @@ public class RegisterController {
                 return new ResponseEntity<>("Error: Email or Username is already in use.", HttpStatus.BAD_REQUEST);
             }
 
-            // Initialize the UserProfile
+            // Initialize the UserProfile with null images
             UserProfile userProfile = new UserProfile();
-            userProfile.setProfileImage(""); // Optional fields, can set a default if needed
-            userProfile.setBannerImage("");
+            userProfile.setProfileImage(null); // Initialize as null for no profile image
+            userProfile.setBannerImage(null);   // Initialize as null for no banner image
 
             // Register User (saves in both MySQL and MongoDB)
             userService.registerUser(user, userProfile);
