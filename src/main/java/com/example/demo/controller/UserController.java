@@ -5,6 +5,7 @@ import com.example.demo.data.UserProfile;
 import com.example.demo.repository.mongoDB.UserProfileRepository;
 import com.example.demo.repository.mySql.UserRepository;
 import com.example.demo.security.request.JwtUtil;
+import com.example.demo.service.UserProfileService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserProfileService userProfileService;
 
     // New registration method to save data in both MySQL and MongoDB
     @PostMapping("/register")
@@ -124,6 +128,23 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/update-role/{username}")
+    public ResponseEntity<?> updateUserRole(@PathVariable String username, @RequestBody String newRole) {
+        // Check if the new role is valid
+        if (newRole == null || newRole.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Role cannot be null or empty");
+        }
+
+        // Use UserProfileService to update the role
+        Optional<UserProfile> updatedProfile = userProfileService.updateUserProfileRole(username, newRole);
+
+        if (updatedProfile.isPresent()) {
+            return ResponseEntity.ok(updatedProfile.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User profile not found");
         }
     }
 }

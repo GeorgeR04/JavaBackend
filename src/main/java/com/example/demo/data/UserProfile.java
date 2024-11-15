@@ -1,9 +1,7 @@
 package com.example.demo.data;
-
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.Base64;
 import java.util.List;
 
 @Data
@@ -24,12 +22,7 @@ public class UserProfile {
     private List<String> friendIds; // IDs of friends (users)
     private List<String> postIds;   // IDs of posts in the chat system
 
-    public String getProfileImageAsBase64() {
-        return profileImage != null ? Base64.getEncoder().encodeToString(profileImage) : null;
-    }
-
-    public String getBannerImageAsBase64() {
-        return bannerImage != null ? Base64.getEncoder().encodeToString(bannerImage) : null;
-    }
-
+    private String role; // Role of the user (e.g., "member", "player", "organizer", "moderator")
+    private String specialization; // Specialization if the role is "player"
+    private String game; // Selected game if the role is "player"
 }

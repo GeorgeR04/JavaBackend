@@ -13,10 +13,54 @@ import java.util.Optional;
 public class UserProfileService {
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private UserProfileRepository userProfileRepository;
+
+
 
     public Optional<UserProfile> getUserProfileByUsername(String username) {
         return userProfileRepository.findByUsername(username);
+    }
+
+    public UserProfile initializeUserProfileWithRole(UserProfile userProfile, int authKey) {
+        switch (authKey) {
+            case 2001:
+                userProfile.setRole("member");
+                break;
+            case 2002:
+                userProfile.setRole("player");
+                userProfile.setGame(null); // Initialize game to null
+                break;
+            case 2003:
+                userProfile.setRole("organizer");
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid authKey: " + authKey);
+        }
+        return userProfileRepository.save(userProfile);
+    }
+
+    public Optional<UserProfile> updatePlayerDetails(String username, String role, String specialization, String game) {
+        return userProfileRepository.findByUsername(username).map(userProfile -> {
+            if (!"player".equals(role) && !"organizer".equals(role)) {
+                throw new IllegalArgumentException("Invalid role specified.");
+            }
+
+            userProfile.setRole(role);
+
+            if ("player".equals(role)) {
+                userProfile.setSpecialization(specialization);
+                userProfile.setGame(game);
+            } else {
+                userProfile.setSpecialization(null);
+                userProfile.setGame(null);
+            }
+
+            userProfileRepository.save(userProfile);
+            return userProfile;
+        });
     }
 
     public Optional<UserProfile> updateProfileImage(String username, MultipartFile profileImage) {
@@ -26,7 +70,6 @@ public class UserProfileService {
                 userProfileRepository.save(userProfile);
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
             return userProfile;
         });
@@ -39,38 +82,27 @@ public class UserProfileService {
                 userProfileRepository.save(userProfile);
             } catch (IOException e) {
                 e.printStackTrace();
-                return null;
             }
             return userProfile;
         });
     }
 
-    public Optional<UserProfile> addTournamentImage(String username, String tournamentImage) {
+    public Optional<UserProfile> updateUserProfileRole(String username, String newRole) {
         Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(username);
-        userProfileOpt.ifPresent(userProfile -> {
-            userProfile.getTournamentImages().add(tournamentImage);
-            userProfileRepository.save(userProfile);
-        });
-        return userProfileOpt;
+
+        if (userProfileOpt.isPresent()) {
+            UserProfile userProfile = userProfileOpt.get();
+            userProfile.setRole(newRole);
+            userProfileRepository.save(userProfile); // Update in MongoDB
+
+            // Synchronize with MySQL
+            userService.synchronizeRoleToMySQL(username);
+
+            return Optional.of(userProfile);
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public Optional<UserProfile> addFriend(String username, String friendUsername) {
-        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(username);
-        userProfileOpt.ifPresent(userProfile -> {
-            if (!userProfile.getFriendIds().contains(friendUsername)) {
-                userProfile.getFriendIds().add(friendUsername);
-                userProfileRepository.save(userProfile);
-            }
-        });
-        return userProfileOpt;
-    }
-
-    public Optional<UserProfile> addPost(String username, String postId) {
-        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(username);
-        userProfileOpt.ifPresent(userProfile -> {
-            userProfile.getPostIds().add(postId);
-            userProfileRepository.save(userProfile);
-        });
-        return userProfileOpt;
-    }
 }
+

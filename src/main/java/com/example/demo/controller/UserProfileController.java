@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.data.UserProfile;
 import com.example.demo.service.UserProfileService;
 import com.example.demo.security.request.JwtUtil;
+import com.example.demo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,12 @@ public class UserProfileController {
     private UserProfileService userProfileService;
 
     @Autowired
+    private UserService userService;
+
+
+    @Autowired
     private JwtUtil jwtUtil;
 
-    // Updated endpoint to search by username
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getUserProfileByUsername(@PathVariable String username, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -37,7 +41,6 @@ public class UserProfileController {
         String token = authHeader.substring(7);
         String tokenUsername = jwtUtil.extractUsername(token);
 
-        // Check if the token's username matches the requested username
         if (!username.equals(tokenUsername)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to access this profile.");
         }
@@ -93,4 +96,79 @@ public class UserProfileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/assign-role")
+    public ResponseEntity<UserProfile> assignRole(
+            @RequestParam int authKey,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+
+        Optional<UserProfile> userProfileOpt = userProfileService.getUserProfileByUsername(username);
+        if (userProfileOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        UserProfile updatedProfile = userProfileService.initializeUserProfileWithRole(userProfileOpt.get(), authKey);
+        return ResponseEntity.ok(updatedProfile);
+    }
+
+    @PostMapping("/set-player-details")
+    public ResponseEntity<UserProfile> setPlayerDetails(
+            @RequestBody Map<String, Object> payload,
+            HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+
+        // Extracting new role, specialization, and game from payload
+        String role = (String) payload.get("role");
+        String specialization = (String) payload.get("specialization");
+        String game = (String) payload.get("game");
+
+        try {
+            // Update player details in MongoDB
+            Optional<UserProfile> updatedProfile = userProfileService.updatePlayerDetails(username, role, specialization, game);
+
+            if (updatedProfile.isPresent()) {
+                // Synchronize role to MySQL after MongoDB update
+                userService.synchronizeRoleToMySQL(username);
+                return ResponseEntity.ok(updatedProfile.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PostMapping("/sync-role")
+    public ResponseEntity<?> synchronizeRoleToMySQL(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid.");
+        }
+
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+
+        try {
+            userService.synchronizeRoleToMySQL(username);
+            return ResponseEntity.ok("Role synchronized successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to synchronize role: " + e.getMessage());
+        }
+    }
+
 }
