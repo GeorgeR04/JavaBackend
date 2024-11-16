@@ -1,3 +1,4 @@
+// File: com/example/demo/data/Game.java
 package com.example.demo.data;
 
 import lombok.Data;
@@ -22,4 +23,6 @@ public class Game {
     private int totalPlayers; // Total active players
     private List<String> platforms; // Supported platforms (e.g., PC, PlayStation)
     private String developer; // Name of the game developer
+    private byte[] gameImage; // Game image
+    private List<String> tournamentIds; // List of tournament IDs associated with the game
 }

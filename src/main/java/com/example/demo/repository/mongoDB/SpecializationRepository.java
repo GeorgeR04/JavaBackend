@@ -1,6 +1,7 @@
 package com.example.demo.repository.mongoDB;
 
 import com.example.demo.data.Specialization;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,7 @@ public class SpecializationRepository {
 
     private final MongoTemplate specializationsMongoTemplate;
 
-    public SpecializationRepository(MongoTemplate specializationsMongoTemplate) {
+    public SpecializationRepository(@Qualifier("specializationsMongoTemplate")MongoTemplate specializationsMongoTemplate) {
         this.specializationsMongoTemplate = specializationsMongoTemplate;
     }
 

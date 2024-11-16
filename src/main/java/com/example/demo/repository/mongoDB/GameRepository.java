@@ -1,6 +1,7 @@
 package com.example.demo.repository.mongoDB;
 
 import com.example.demo.data.Game;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,8 +12,8 @@ public class GameRepository {
 
     private final MongoTemplate gameMongoTemplate;
 
-    public GameRepository(MongoTemplate gameMongoTemplate) {
-        this.gameMongoTemplate = gameMongoTemplate;
+    public GameRepository(@Qualifier("gameMongoTemplate") MongoTemplate mongoTemplate) {
+        this.gameMongoTemplate = mongoTemplate;
     }
 
     public void save(Game game) {

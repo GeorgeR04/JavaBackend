@@ -1,6 +1,7 @@
 package com.example.demo.repository.mongoDB;
 
 import com.example.demo.data.UserProfile;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -14,7 +15,9 @@ public class UserProfileRepository {
 
     private final MongoTemplate userProfileMongoTemplate;
 
-    public UserProfileRepository(MongoTemplate userProfileMongoTemplate) {
+
+
+    public UserProfileRepository(@Qualifier("userProfileMongoTemplate") MongoTemplate userProfileMongoTemplate) {
         this.userProfileMongoTemplate = userProfileMongoTemplate;
     }
 

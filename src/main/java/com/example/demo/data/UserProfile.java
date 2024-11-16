@@ -1,7 +1,10 @@
+// File: com/example/demo/data/UserProfile.java
 package com.example.demo.data;
+
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.List;
 
 @Data
@@ -25,4 +28,6 @@ public class UserProfile {
     private String role; // Role of the user (e.g., "member", "player", "organizer", "moderator")
     private String specialization; // Specialization if the role is "player"
     private String game; // Selected game if the role is "player"
+    private String rank; // Player rank, null for new players
+    private double trustFactor; // Trust factor to determine player's behavior (e.g., 0.0 - 1.0)
 }
