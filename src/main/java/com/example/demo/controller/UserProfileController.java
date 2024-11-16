@@ -61,6 +61,9 @@ public class UserProfileController {
         response.put("bannerImage", userProfile.getBannerImage() != null ?
                 Base64.getEncoder().encodeToString(userProfile.getBannerImage()) : null);
         response.put("tournamentImages", userProfile.getTournamentImages());
+        response.put("role", userProfile.getRole());
+        response.put("specialization", userProfile.getSpecialization());
+        response.put("game", userProfile.getGame());
 
         return ResponseEntity.ok(response);
     }
