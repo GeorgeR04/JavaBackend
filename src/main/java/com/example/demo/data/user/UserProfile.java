@@ -1,5 +1,4 @@
-// File: com/example/demo/data/UserProfile.java
-package com.example.demo.data;
+package com.example.demo.data.user;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

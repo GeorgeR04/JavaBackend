@@ -1,6 +1,6 @@
 //package com.example.demo.test;
 //
-//import com.example.demo.data.UserProfile;
+//import com.example.demo.data.user.UserProfile;
 //import com.example.demo.repository.mongoDB.UserProfileRepository;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.CommandLineRunner;

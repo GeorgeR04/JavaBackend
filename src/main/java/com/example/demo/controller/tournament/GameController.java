@@ -1,10 +1,10 @@
-package com.example.demo.controller;
+package com.example.demo.controller.tournament;
 
-import com.example.demo.data.Game;
-import com.example.demo.data.UserProfile;
+import com.example.demo.data.tournament.Game;
+import com.example.demo.data.user.UserProfile;
 import com.example.demo.security.request.JwtUtil;
-import com.example.demo.service.GameService;
-import com.example.demo.service.UserProfileService;
+import com.example.demo.service.tournament.GameService;
+import com.example.demo.service.user.UserProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,12 @@ public class GameController {
 
     @Autowired
     private UserProfileService userProfileService;
+
+    @GetMapping
+    public ResponseEntity<List<Game>> getAllGames() {
+        List<Game> games = gameService.getAllGames();
+        return ResponseEntity.ok(games);
+    }
 
     @GetMapping("/list")
     public ResponseEntity<?> getAllGames(HttpServletRequest request) {

@@ -1,6 +1,6 @@
-package com.example.demo.controller;
-import com.example.demo.data.Specialization;
-import com.example.demo.service.SpecializationService;
+package com.example.demo.controller.tournament;
+import com.example.demo.data.tournament.Specialization;
+import com.example.demo.service.tournament.SpecializationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

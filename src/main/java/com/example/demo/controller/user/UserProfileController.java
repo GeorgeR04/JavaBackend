@@ -1,9 +1,9 @@
-package com.example.demo.controller;
+package com.example.demo.controller.user;
 
-import com.example.demo.data.UserProfile;
-import com.example.demo.service.UserProfileService;
+import com.example.demo.data.user.UserProfile;
+import com.example.demo.service.user.UserProfileService;
 import com.example.demo.security.request.JwtUtil;
-import com.example.demo.service.UserService;
+import com.example.demo.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.example.demo.repository.mongoDB;
 
-import com.example.demo.data.Team;
+import com.example.demo.data.user.Team;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;

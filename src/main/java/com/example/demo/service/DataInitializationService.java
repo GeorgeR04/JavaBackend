@@ -1,7 +1,7 @@
 //package com.example.demo.service;
 //
-//import com.example.demo.data.Game;
-//import com.example.demo.data.Specialization;
+//import com.example.demo.data.tournament.Game;
+//import com.example.demo.data.tournament.Specialization;
 //import com.example.demo.repository.mongoDB.GameRepository;
 //import com.example.demo.repository.mongoDB.SpecializationRepository;
 //import org.springframework.stereotype.Service;

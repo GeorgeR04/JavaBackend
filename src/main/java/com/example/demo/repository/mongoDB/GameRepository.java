@@ -1,6 +1,6 @@
 package com.example.demo.repository.mongoDB;
 
-import com.example.demo.data.Game;
+import com.example.demo.data.tournament.Game;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,7 +23,14 @@ public class GameRepository {
     public List<Game> findAll() {
         return gameMongoTemplate.findAll(Game.class);
     }
+
     public String getDatabaseName() {
         return gameMongoTemplate.getDb().getName();
     }
+
+    // Fetch a Game by its ID
+    public Game findById(String id) {
+        return gameMongoTemplate.findById(id, Game.class);
+    }
 }
+

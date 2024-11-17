@@ -1,4 +1,4 @@
-package com.example.demo.data;
+package com.example.demo.data.tournament;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

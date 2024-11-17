@@ -1,6 +1,6 @@
-package com.example.demo.service;
+package com.example.demo.service.tournament;
 
-import com.example.demo.data.Tournament;
+import com.example.demo.data.tournament.Tournament;
 import com.example.demo.repository.mongoDB.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

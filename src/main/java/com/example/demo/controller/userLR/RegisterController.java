@@ -1,8 +1,8 @@
-package com.example.demo.controller;
+package com.example.demo.controller.userLR;
 
-import com.example.demo.data.User;
-import com.example.demo.data.UserProfile;
-import com.example.demo.service.UserService;
+import com.example.demo.data.user.User;
+import com.example.demo.data.user.UserProfile;
+import com.example.demo.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

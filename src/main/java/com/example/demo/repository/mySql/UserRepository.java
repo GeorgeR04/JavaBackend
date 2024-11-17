@@ -1,5 +1,5 @@
 package com.example.demo.repository.mySql;
-import com.example.demo.data.User;
+import com.example.demo.data.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

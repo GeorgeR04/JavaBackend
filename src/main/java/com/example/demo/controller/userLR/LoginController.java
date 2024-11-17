@@ -1,5 +1,5 @@
-package com.example.demo.controller;
-import com.example.demo.data.User;
+package com.example.demo.controller.userLR;
+import com.example.demo.data.user.User;
 import com.example.demo.security.request.LoginRequest;
 import com.example.demo.repository.mySql.UserRepository;
 import com.example.demo.security.request.JwtUtil;

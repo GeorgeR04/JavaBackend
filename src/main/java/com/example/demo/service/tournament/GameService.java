@@ -1,6 +1,6 @@
-package com.example.demo.service;
+package com.example.demo.service.tournament;
 
-import com.example.demo.data.Game;
+import com.example.demo.data.tournament.Game;
 import com.example.demo.repository.mongoDB.GameRepository;
 import org.springframework.stereotype.Service;
 
@@ -26,5 +26,9 @@ public class GameService {
             System.out.println("Error fetching games: " + e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    public Game getGameById(String gameId) {
+        return gameRepository.findById(gameId);
     }
 }

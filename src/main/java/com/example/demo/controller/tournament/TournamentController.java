@@ -1,21 +1,21 @@
-package com.example.demo.controller;
+package com.example.demo.controller.tournament;
 
-import com.example.demo.data.Tournament;
-import com.example.demo.data.UserProfile;
+import com.example.demo.data.tournament.Game;
+import com.example.demo.data.tournament.Tournament;
+import com.example.demo.data.user.UserProfile;
 import com.example.demo.security.request.JwtUtil;
-import com.example.demo.service.TeamService;
-import com.example.demo.service.TournamentService;
-import com.example.demo.service.UserProfileService;
+import com.example.demo.service.tournament.GameService;
+import com.example.demo.service.user.TeamService;
+import com.example.demo.service.tournament.TournamentService;
+import com.example.demo.service.user.UserProfileService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tournaments")
@@ -33,6 +33,9 @@ public class TournamentController {
     @Autowired
     private UserProfileService userProfileService;
 
+    @Autowired
+    private GameService gameService;
+
     // Helper method to get the role from the user's profile
     private String getRoleFromToken(String token) {
         String username = jwtUtil.extractUsername(token);
@@ -41,23 +44,31 @@ public class TournamentController {
     }
 
     // Fetch all tournaments
-    @GetMapping
-    public ResponseEntity<?> getAllTournaments(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token.");
-        }
+    @GetMapping("/list")
+    public ResponseEntity<?> getAllTournaments() {
+        List<Tournament> tournaments = tournamentService.getAllTournaments();
 
-        String token = authHeader.substring(7);
-        String role = getRoleFromToken(token);
+        // Fetch game names for each tournament
+        List<Map<String, Object>> response = tournaments.stream().map(tournament -> {
+            Map<String, Object> tournamentData = new HashMap<>();
+            tournamentData.put("id", tournament.getId());
+            tournamentData.put("name", tournament.getName());
+            tournamentData.put("description", tournament.getDescription());
+            tournamentData.put("type", tournament.getType());
+            tournamentData.put("rankRequirement", tournament.getRankRequirement());
+            tournamentData.put("trustFactorRequirement", tournament.getTrustFactorRequirement());
+            tournamentData.put("organizerId", tournament.getOrganizerId());
 
-        if (role == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User role not found.");
-        }
+            // Fetch game details
+            Game game = gameService.getGameById(tournament.getGameId());
+            tournamentData.put("gameName", game != null ? game.getName() : "Unknown Game");
 
-        // Allow all roles to fetch tournaments
-        return ResponseEntity.ok(tournamentService.getAllTournaments());
+            return tournamentData;
+        }).collect(Collectors.toList());
+        tournaments.forEach(t -> System.out.println("Tournament ID: " + t.getId() + ", Game ID: " + t.getGameId()));
+        return ResponseEntity.ok(response);
     }
+
 
     // Create a tournament
     @PostMapping("/create")

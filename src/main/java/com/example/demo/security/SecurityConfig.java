@@ -54,12 +54,14 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll() // Public endpoints
+                        .requestMatchers("/api/tournaments/list", "/api/games").permitAll() // Allow public access to tournaments list
                         .requestMatchers("/api/profile", "/api/profile/**").authenticated() // Secure profile endpoints
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // Secure all other endpoints
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(jwtRequestFilter(userDetailsService()), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
 }

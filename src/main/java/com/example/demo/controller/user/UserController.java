@@ -1,12 +1,12 @@
-package com.example.demo.controller;
+package com.example.demo.controller.user;
 
-import com.example.demo.data.User;
-import com.example.demo.data.UserProfile;
+import com.example.demo.data.user.User;
+import com.example.demo.data.user.UserProfile;
 import com.example.demo.repository.mongoDB.UserProfileRepository;
 import com.example.demo.repository.mySql.UserRepository;
 import com.example.demo.security.request.JwtUtil;
-import com.example.demo.service.UserProfileService;
-import com.example.demo.service.UserService;
+import com.example.demo.service.user.UserProfileService;
+import com.example.demo.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

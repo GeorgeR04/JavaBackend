@@ -1,5 +1,5 @@
-package com.example.demo.service;
-import com.example.demo.data.Specialization;
+package com.example.demo.service.tournament;
+import com.example.demo.data.tournament.Specialization;
 import com.example.demo.repository.mongoDB.SpecializationRepository;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
-package com.example.demo.service;
+package com.example.demo.service.user;
 
-import com.example.demo.data.User;
-import com.example.demo.data.UserProfile;
+import com.example.demo.data.user.User;
+import com.example.demo.data.user.UserProfile;
 import com.example.demo.repository.mongoDB.UserProfileRepository;
 import com.example.demo.repository.mySql.UserRepository;
 import org.slf4j.Logger;

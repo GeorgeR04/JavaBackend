@@ -1,6 +1,6 @@
-package com.example.demo.service;
+package com.example.demo.service.user;
 
-import com.example.demo.data.Team;
+import com.example.demo.data.user.Team;
 import com.example.demo.repository.mongoDB.TeamRepository;
 import org.springframework.stereotype.Service;
 

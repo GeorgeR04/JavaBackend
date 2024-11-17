@@ -1,7 +1,7 @@
-package com.example.demo.controller;
+package com.example.demo.controller.user;
 
-import com.example.demo.data.Team;
-import com.example.demo.service.TeamService;
+import com.example.demo.data.user.Team;
+import com.example.demo.service.user.TeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
