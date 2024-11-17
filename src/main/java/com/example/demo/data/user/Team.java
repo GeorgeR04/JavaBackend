@@ -22,6 +22,5 @@ public class Team {
     private byte[] teamLogo;
     private String gameId;
     private String rank;
-
     private String teamLeaderId; // Explicit leader field
 }

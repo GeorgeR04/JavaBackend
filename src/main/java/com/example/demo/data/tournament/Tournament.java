@@ -1,4 +1,5 @@
 package com.example.demo.data.tournament;
+
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,20 +12,24 @@ public class Tournament {
     @Id
     private String id;
 
-    private String name; // Tournament name
-    private String description; // Short description
-    private byte[] image; // Tournament image
-    private String organizerId; // Organizer (User ID, optional)
-    private String organizerTeamId; // Organizer team (Team ID, optional)
-    private double cashPrize; // Prize money
-    private int maxTeams; // Maximum teams allowed
-    private List<String> participatingTeamIds; // List of participating team IDs
-    private String gameId; // Game associated with this tournament
-    private String type; // Tournament type (e.g., D, C, B, A, S)
-    private String status; // "ONGOING" or "FINISHED"
-    private LocalDateTime startDate; // Start date and time
-    private LocalDateTime finishDate; // Finish date and time
-    private String visibility; // "private" or "public"
-    private Integer RankRequirement; // Player rank, null for new players
-    private Integer TrustFactorRequirement; // Trust factor to determine player's behavior (e.g., 0.0 - 1.0)
+    private String name;
+    private String description;
+    private byte[] image;
+    private List<String> organizerIds; // List of individual organizer IDs
+    private String teamId; // Organizer team ID (if applicable)
+    private double reputation; // Calculated reputation
+    private String rank; // Calculated rank (D, C, B, A, S)
+    private double cashPrize;
+    private int maxTeams;
+    private List<String> participatingIds; // IDs of participants (players or teams, depending on type)
+    private String gameId;
+    private String type; // "solo" or "team" tournament type
+    private String status; // Tournament status (e.g., "ONGOING", "FINISHED")
+    private LocalDateTime startDate;
+    private LocalDateTime finishDate;
+    private String visibility; // "public" or "private"
+    private Integer minRankRequirement;
+    private Integer maxRankRequirement;
+    private Integer trustFactorRequirement;
+    private String mvpPlayerId; // Most Valuable Player ID
 }

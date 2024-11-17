@@ -53,8 +53,7 @@ public class SecurityConfig {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll() // Public endpoints
-                        .requestMatchers("/api/tournaments/list", "/api/games").permitAll() // Allow public access to tournaments list
+                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/tournaments/list", "/api/games", "/api/tournaments/{id}").permitAll() // Public endpoints
                         .requestMatchers("/api/profile", "/api/profile/**").authenticated() // Secure profile endpoints
                         .anyRequest().authenticated() // Secure all other endpoints
                 )

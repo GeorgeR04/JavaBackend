@@ -1,18 +1,31 @@
 package com.example.demo.service.tournament;
 
 import com.example.demo.data.tournament.Tournament;
+import com.example.demo.data.user.Team;
+import com.example.demo.data.user.UserProfile;
+import com.example.demo.repository.mongoDB.TeamRepository;
 import com.example.demo.repository.mongoDB.TournamentRepository;
+import com.example.demo.repository.mongoDB.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.Base64;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TournamentService {
 
     @Autowired
     private TournamentRepository tournamentRepository;
+
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
@@ -25,6 +38,7 @@ public class TournamentService {
     public Tournament createTournament(Tournament tournament) {
         tournament.setStatus("ONGOING"); // Default status
         tournament.setStartDate(LocalDateTime.now()); // Set current time as start
+        calculateReputationAndRank(tournament); // Calculate reputation and rank
         tournamentRepository.save(tournament);
         return tournament;
     }
@@ -33,6 +47,7 @@ public class TournamentService {
         Tournament existingTournament = tournamentRepository.findById(id);
         if (existingTournament != null && !"FINISHED".equals(existingTournament.getStatus())) {
             updatedTournament.setId(id); // Keep the same ID
+            calculateReputationAndRank(updatedTournament); // Recalculate reputation and rank
             tournamentRepository.save(updatedTournament);
             return updatedTournament;
         }
@@ -65,11 +80,19 @@ public class TournamentService {
 
     public boolean addParticipant(String tournamentId, String participantId) {
         Tournament tournament = tournamentRepository.findById(tournamentId);
-        if (tournament != null && !tournament.getParticipatingTeamIds().contains(participantId)) {
-            if (tournament.getParticipatingTeamIds().size() < tournament.getMaxTeams()) {
-                tournament.getParticipatingTeamIds().add(participantId);
-                tournamentRepository.save(tournament);
-                return true;
+        if (tournament != null) {
+            if ("solo".equals(tournament.getType())) {
+                if (!tournament.getParticipatingIds().contains(participantId)) {
+                    tournament.getParticipatingIds().add(participantId);
+                    tournamentRepository.save(tournament);
+                    return true;
+                }
+            } else if ("team".equals(tournament.getType())) {
+                if (!tournament.getParticipatingIds().contains(participantId)) {
+                    tournament.getParticipatingIds().add(participantId);
+                    tournamentRepository.save(tournament);
+                    return true;
+                }
             }
         }
         return false;
@@ -77,8 +100,8 @@ public class TournamentService {
 
     public boolean removeParticipant(String tournamentId, String participantId) {
         Tournament tournament = tournamentRepository.findById(tournamentId);
-        if (tournament != null && tournament.getParticipatingTeamIds().contains(participantId)) {
-            tournament.getParticipatingTeamIds().remove(participantId);
+        if (tournament != null && tournament.getParticipatingIds().contains(participantId)) {
+            tournament.getParticipatingIds().remove(participantId);
             tournamentRepository.save(tournament);
             return true;
         }
@@ -95,4 +118,69 @@ public class TournamentService {
         return base64Image != null ? Base64.getDecoder().decode(base64Image) : null;
     }
 
+    // **NEW**: Calculate reputation and rank
+    private void calculateReputationAndRank(Tournament tournament) {
+        double totalReputation = 0;
+        int totalOrganizers = 0;
+
+        // Calculate reputation for organizer team
+        if (tournament.getTeamId() != null) {
+            Team organizerTeam = teamRepository.findById(tournament.getTeamId());
+            if (organizerTeam != null) {
+                List<UserProfile> teamMembers = organizerTeam.getPlayerIds().stream()
+                        .map(userProfileRepository::findByUsername)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList());
+
+                double teamReputation = teamMembers.stream()
+                        .mapToDouble(UserProfile::getTrustFactor)
+                        .average()
+                        .orElse(0.0);
+
+                totalReputation += teamReputation * teamMembers.size();
+                totalOrganizers += teamMembers.size();
+            }
+        }
+
+        // Calculate reputation for individual organizers
+        if (tournament.getOrganizerIds() != null) {
+            List<UserProfile> individualOrganizers = tournament.getOrganizerIds().stream()
+                    .map(userProfileRepository::findByUsername)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+
+            double individualReputation = individualOrganizers.stream()
+                    .mapToDouble(UserProfile::getTrustFactor)
+                    .sum();
+
+            totalReputation += individualReputation;
+            totalOrganizers += individualOrganizers.size();
+        }
+
+        // Calculate average reputation
+        double reputation = totalOrganizers > 0 ? totalReputation / totalOrganizers : 0;
+        tournament.setReputation(reputation);
+
+        // Set rank based on reputation
+        tournament.setRank(determineRank(reputation));
+    }
+
+
+
+    // **NEW**: Determine rank based on reputation
+    private String determineRank(double reputation) {
+        if (reputation >= 8) {
+            return "S";
+        } else if (reputation >= 6) {
+            return "A";
+        } else if (reputation >= 4) {
+            return "B";
+        } else if (reputation >= 2) {
+            return "C";
+        } else {
+            return "D";
+        }
+    }
 }
