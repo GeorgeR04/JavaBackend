@@ -1,4 +1,3 @@
-// File: com/example/demo/data/Game.java
 package com.example.demo.data.tournament;
 
 import lombok.Data;
@@ -21,6 +20,7 @@ public class Game {
     private String bestPlayerId; // Best player ID
     private String bestTeamId; // Best team ID
     private int totalPlayers; // Total active players
+    private int maxPlayersPerTeam; // Maximum players allowed in a team for this game
     private List<String> platforms; // Supported platforms (e.g., PC, PlayStation)
     private String developer; // Name of the game developer
     private byte[] gameImage; // Game image

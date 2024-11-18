@@ -1,7 +1,7 @@
 package com.example.demo.service.user;
 
 import com.example.demo.data.user.OrganizerTeam;
-import com.example.demo.repository.mongoDB.OrganizerTeamRepository;
+import com.example.demo.repository.mongoDB.user.OrganizerTeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

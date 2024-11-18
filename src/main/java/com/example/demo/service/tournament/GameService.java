@@ -1,7 +1,7 @@
 package com.example.demo.service.tournament;
 
 import com.example.demo.data.tournament.Game;
-import com.example.demo.repository.mongoDB.GameRepository;
+import com.example.demo.repository.mongoDB.tournament.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -31,4 +31,16 @@ public class GameService {
     public Game getGameById(String gameId) {
         return gameRepository.findById(gameId);
     }
+
+    public Game createGame(Game game, Long organizerId) {
+        game.setDeveloper(organizerId.toString());
+        gameRepository.save(game);
+        return game;
+    }
+
+    public long countGamesByOrganizer(Long organizerId) {
+        return gameRepository.countByDeveloper(String.valueOf(organizerId));
+    }
+
+
 }

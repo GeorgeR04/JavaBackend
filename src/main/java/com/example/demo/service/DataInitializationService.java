@@ -2,8 +2,8 @@
 //
 //import com.example.demo.data.tournament.Game;
 //import com.example.demo.data.tournament.Specialization;
-//import com.example.demo.repository.mongoDB.GameRepository;
-//import com.example.demo.repository.mongoDB.SpecializationRepository;
+//import com.example.demo.repository.mongoDB.tournament.GameRepository;
+//import com.example.demo.repository.mongoDB.tournament.SpecializationRepository;
 //import org.springframework.stereotype.Service;
 //import java.util.Arrays;
 //import org.slf4j.Logger;

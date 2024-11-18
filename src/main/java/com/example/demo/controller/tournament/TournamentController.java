@@ -4,6 +4,8 @@ import com.example.demo.data.tournament.Game;
 import com.example.demo.data.tournament.Tournament;
 import com.example.demo.data.user.UserProfile;
 import com.example.demo.security.request.JwtUtil;
+import com.example.demo.service.match.MatchService;
+import com.example.demo.service.match.RoundService;
 import com.example.demo.service.tournament.GameService;
 import com.example.demo.service.user.TeamService;
 import com.example.demo.service.tournament.TournamentService;
@@ -36,12 +38,21 @@ public class TournamentController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    private RoundService roundService;
+
+    @Autowired
+    private MatchService matchService;
+
+
+
     // Helper method to get the role from the user's profile
     private String getRoleFromToken(String token) {
         String username = jwtUtil.extractUsername(token);
         UserProfile userProfile = userProfileService.getUserProfileByUsername(username).orElse(null);
         return userProfile != null ? userProfile.getRole() : null;
     }
+
 
     // Fetch all tournaments
     @GetMapping("/list")
@@ -62,8 +73,9 @@ public class TournamentController {
             tournamentData.put("rank", tournament.getRank());
             tournamentData.put("status", tournament.getStatus());
             tournamentData.put("visibility", tournament.getVisibility());
-            tournamentData.put("organizerIds", tournament.getOrganizerIds());
             tournamentData.put("maxTeams", tournament.getMaxTeams());
+            tournamentData.put("victory", tournament.getVictory());
+            tournamentData.put("rule", tournament.getRule());
             // Encode the image as Base64
             if (tournament.getImage() != null) {
                 tournamentData.put("image", Base64.getEncoder().encodeToString(tournament.getImage()));
@@ -75,12 +87,21 @@ public class TournamentController {
             Game game = gameService.getGameById(tournament.getGameId());
             tournamentData.put("gameName", game != null ? game.getName() : "Unknown Game");
 
+            // Fetch organizer names instead of IDs
+            List<String> organizerIds = tournament.getOrganizerIds();
+            List<String> organizerNames = organizerIds.stream()
+                    .map(userProfileService::getUserProfileByUsername) // Fetch UserProfile for each ID
+                    .filter(Optional::isPresent) // Filter out missing profiles
+                    .map(Optional::get) // Unwrap Optional
+                    .map(UserProfile::getUsername) // Get the username (or any other identifying field)
+                    .collect(Collectors.toList());
+            tournamentData.put("organizerNames", organizerNames);
+
             return tournamentData;
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
     }
-
     // Create a tournament
     @PostMapping("/create")
     public ResponseEntity<?> createTournament(
@@ -194,23 +215,36 @@ public class TournamentController {
         response.put("image", tournament.getImage() != null ? Base64.getEncoder().encodeToString(tournament.getImage()) : null);
         response.put("reputation", tournament.getReputation());
         response.put("rank", tournament.getRank());
+        response.put("maxTeams", tournament.getMaxTeams());
+        response.put("rule", tournament.getRule());
+
+        // Fetch organizer names instead of IDs
+        List<String> organizerIds = tournament.getOrganizerIds();
+        List<String> organizerNames = organizerIds.stream()
+                .map(userProfileService::getUserProfileByUsername) // Fetch UserProfile for each ID
+                .filter(Optional::isPresent) // Filter out missing profiles
+                .map(Optional::get) // Unwrap Optional
+                .map(UserProfile::getUsername) // Get the username (or any other identifying field)
+                .collect(Collectors.toList());
+        response.put("organizerNames", organizerNames);
 
 
         // Include MVP info only if the tournament is finished
         if ("FINISHED".equals(tournament.getStatus())) {
             response.put("mvpPlayerId", tournament.getMvpPlayerId());
+            response.put("victory",tournament.getVictory());
         }
 
         return ResponseEntity.ok(response);
     }
 
 
-        // Update a tournament
-        @PutMapping("/{id}")
-        public ResponseEntity<?> updateTournament(
-                @PathVariable String id,
-                @RequestBody Map<String, Object> payload,
-                HttpServletRequest request) {
+    // Update a tournament
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTournament(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> payload,
+            HttpServletRequest request) {
 
             String authHeader = request.getHeader("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {

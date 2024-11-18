@@ -47,6 +47,21 @@ public class MultipleMongoConfig {
         return new MongoTemplate(client, "Tournaments"); // Connect to Tournaments database
     }
 
+    // New Bean for Rounds database
+    @Bean(name = "roundsMongoTemplate")
+    public MongoTemplate roundsMongoTemplate() {
+        MongoClient client = MongoClients.create("mongodb://localhost:27018");
+        return new MongoTemplate(client, "Rounds"); // Connect to Rounds database
+    }
+
+    // New Bean for Matches database
+    @Bean(name = "matchesMongoTemplate")
+    public MongoTemplate matchesMongoTemplate() {
+        MongoClient client = MongoClients.create("mongodb://localhost:27018");
+        return new MongoTemplate(client, "Matches"); // Connect to Matches database
+    }
+
+
 
     @Bean
     public GridFsTemplate gridFsTemplate(@Qualifier("userProfileMongoTemplate") MongoTemplate userProfileMongoTemplate) {

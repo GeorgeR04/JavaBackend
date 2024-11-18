@@ -3,12 +3,14 @@ package com.example.demo.service.tournament;
 import com.example.demo.data.tournament.Tournament;
 import com.example.demo.data.user.Team;
 import com.example.demo.data.user.UserProfile;
-import com.example.demo.repository.mongoDB.TeamRepository;
-import com.example.demo.repository.mongoDB.TournamentRepository;
-import com.example.demo.repository.mongoDB.UserProfileRepository;
+import com.example.demo.repository.mongoDB.user.TeamRepository;
+import com.example.demo.repository.mongoDB.tournament.TournamentRepository;
+import com.example.demo.repository.mongoDB.user.UserProfileRepository;
+import com.example.demo.security.request.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +28,9 @@ public class TournamentService {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public List<Tournament> getAllTournaments() {
         return tournamentRepository.findAll();
@@ -81,6 +86,11 @@ public class TournamentService {
     public boolean addParticipant(String tournamentId, String participantId) {
         Tournament tournament = tournamentRepository.findById(tournamentId);
         if (tournament != null) {
+            // Initialize participatingIds if null
+            if (tournament.getParticipatingIds() == null) {
+                tournament.setParticipatingIds(new ArrayList<>());
+            }
+
             if ("solo".equals(tournament.getType())) {
                 if (!tournament.getParticipatingIds().contains(participantId)) {
                     tournament.getParticipatingIds().add(participantId);
@@ -106,6 +116,16 @@ public class TournamentService {
             return true;
         }
         return false;
+    }
+
+    // **NEW**: Get role from token
+    public String getRoleFromToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        if (username == null || username.isEmpty()) {
+            return null; // Invalid token or no username found
+        }
+        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(username);
+        return userProfileOpt.map(UserProfile::getRole).orElse(null);
     }
 
     // Encode the image for frontend rendering
@@ -167,8 +187,6 @@ public class TournamentService {
         tournament.setRank(determineRank(reputation));
     }
 
-
-
     // **NEW**: Determine rank based on reputation
     private String determineRank(double reputation) {
         if (reputation >= 8) {
@@ -183,4 +201,5 @@ public class TournamentService {
             return "D";
         }
     }
+
 }

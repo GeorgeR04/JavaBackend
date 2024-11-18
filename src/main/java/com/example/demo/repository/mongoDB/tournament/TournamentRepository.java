@@ -1,4 +1,4 @@
-package com.example.demo.repository.mongoDB;
+package com.example.demo.repository.mongoDB.tournament;
 
 import com.example.demo.data.tournament.Tournament;
 import org.springframework.beans.factory.annotation.Qualifier;

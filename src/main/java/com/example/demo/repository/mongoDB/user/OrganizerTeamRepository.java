@@ -1,4 +1,4 @@
-package com.example.demo.repository.mongoDB;
+package com.example.demo.repository.mongoDB.user;
 
 import com.example.demo.data.user.OrganizerTeam;
 import org.springframework.beans.factory.annotation.Qualifier;

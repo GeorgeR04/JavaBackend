@@ -1,4 +1,4 @@
-package com.example.demo.repository.mongoDB;
+package com.example.demo.repository.mongoDB.user;
 
 import com.example.demo.data.user.Team;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -71,4 +71,15 @@ public class TeamRepository {
             throw new RuntimeException("Failed to find teams by game ID", e);
         }
     }
+
+    // New method to check if a player has created a team
+    public boolean existsByTeamLeaderId(String teamLeaderId) {
+        try {
+            Query query = new Query(Criteria.where("teamLeaderId").is(teamLeaderId));
+            return mongoTemplate.exists(query, Team.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to check if player has created a team", e);
+        }
+    }
+
 }

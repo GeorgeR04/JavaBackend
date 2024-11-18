@@ -1,8 +1,7 @@
 package com.example.demo.service.user;
 
 import com.example.demo.data.user.UserProfile;
-import com.example.demo.repository.mongoDB.UserProfileRepository;
-import com.example.demo.service.user.UserService;
+import com.example.demo.repository.mongoDB.user.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

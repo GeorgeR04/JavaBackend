@@ -1,4 +1,4 @@
-package com.example.demo.repository.mongoDB;
+package com.example.demo.repository.mongoDB.user;
 
 import com.example.demo.data.user.UserProfile;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +42,14 @@ public class UserProfileRepository {
         return userProfileMongoTemplate.findAll(UserProfile.class);
     }
 
+
     public void deleteById(String id) {
         userProfileMongoTemplate.remove(userProfileMongoTemplate.findById(id, UserProfile.class));
     }
+
+    public List<UserProfile> findAllByIds(List<String> ids) {
+        Query query = new Query(Criteria.where("id").in(ids));
+        return userProfileMongoTemplate.find(query, UserProfile.class);
+    }
+
 }

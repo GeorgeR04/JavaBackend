@@ -2,7 +2,7 @@ package com.example.demo.controller.user;
 
 import com.example.demo.data.user.User;
 import com.example.demo.data.user.UserProfile;
-import com.example.demo.repository.mongoDB.UserProfileRepository;
+import com.example.demo.repository.mongoDB.user.UserProfileRepository;
 import com.example.demo.repository.mySql.UserRepository;
 import com.example.demo.security.request.JwtUtil;
 import com.example.demo.service.user.UserProfileService;

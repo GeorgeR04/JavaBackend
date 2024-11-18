@@ -29,4 +29,8 @@ public class UserProfile {
     private String game; // Selected game if the role is "player"
     private String rank; // Player rank, null for new players
     private double trustFactor; // Trust factor to determine player's behavior (e.g., 0.0 - 1.0)
+
+    // New fields
+    private List<String> pastTournaments; // IDs of tournaments the user has participated in
+    private List<String> currentTournaments; // IDs of tournaments the user is currently participating in
 }

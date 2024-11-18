@@ -53,8 +53,19 @@ public class SecurityConfig {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/tournaments/list", "/api/games", "/api/tournaments/{id}").permitAll() // Public endpoints
-                        .requestMatchers("/api/profile", "/api/profile/**").authenticated() // Secure profile endpoints
+                        // Public endpoints
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/tournaments/list",
+                                "/api/games",
+                                "/api/tournaments/{id}",
+                                "/api/playoffs/{tournamentId}/rounds",
+                                "/api/playoffs/{tournamentId}/structure",
+                                "/api/teams/list"
+                        ).permitAll()
+                        // Secured endpoints
+                        .requestMatchers("/api/profile", "/api/profile/**").authenticated()
                         .anyRequest().authenticated() // Secure all other endpoints
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
