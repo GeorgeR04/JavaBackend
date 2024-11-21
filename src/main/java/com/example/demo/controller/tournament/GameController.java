@@ -40,46 +40,36 @@ public class GameController {
 
     @GetMapping("/list")
     public ResponseEntity<?> getAllGames(HttpServletRequest request) {
-        System.out.println("Incoming request URL: " + request.getRequestURL());
-
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Authorization header missing or invalid.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
         }
 
         try {
             String token = authHeader.substring(7);
             String username = jwtUtil.extractUsername(token);
-            System.out.println("Extracted username: " + username);
 
             UserProfile user = userProfileService.getUserProfileByUsername(username).orElse(null);
             if (user == null) {
-                System.out.println("User not found for username: " + username);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found.");
             }
 
             List<Game> games = gameService.getAllGames();
-            System.out.println("Fetched games: " + games);
             return ResponseEntity.ok(games);
-
         } catch (Exception e) {
-            System.out.println("Error processing request: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.");
         }
     }
 
-    // Create a new game
     @PostMapping("/create")
     public ResponseEntity<?> createGame(@RequestBody Game game, HttpServletRequest request) {
-        // Authorization checks
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
         }
 
         try {
-            // Extract user info
             String token = authHeader.substring(7);
             String username = jwtUtil.extractUsername(token);
 
@@ -88,7 +78,6 @@ public class GameController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found.");
             }
 
-            // Permission check
             if (!user.getRole().equalsIgnoreCase("organizer") && !user.getRole().equalsIgnoreCase("moderator")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to add games.");
             }
@@ -104,10 +93,16 @@ public class GameController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Year of existence is required.");
             }
             if (game.getPublisher() == null || game.getPublisher().trim().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Publisher is required.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Publisher must be a valid string.");
+            }
+            if (game.getPlatforms() == null || game.getPlatforms().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("At least one platform must be specified.");
+            }
+            if (game.getDescription() != null && game.getDescription().length() > 1000) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Description must be under 1000 characters.");
             }
 
-            // Game creation logic
+            // Rank-based game limit (unless moderator)
             int maxGames = getMaxGamesByRank(user.getRank(), user.getRole());
             if (maxGames != -1) { // If there's a limit
                 long addedGamesCount = gameService.countGamesByOrganizer(user.getUserId());
@@ -117,22 +112,22 @@ public class GameController {
                 }
             }
 
+            game.setOrganizerId(user.getUserId().toString());
             // Save the game
             gameService.createGame(game, user.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED).body("Game created successfully.");
         } catch (Exception e) {
-            e.printStackTrace(); // Log the error for debugging
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
 
+
     private int getMaxGamesByRank(String rank, String role) {
-        // Moderators can create unlimited games
         if (role.equalsIgnoreCase("moderator")) {
-            return -1;
+            return -1; // No limit for moderators
         }
 
-        // Ensure rank is valid for organizers
         if (rank == null) {
             throw new IllegalArgumentException("User rank cannot be null.");
         }
@@ -147,8 +142,16 @@ public class GameController {
         }
     }
 
+    @GetMapping("/organizer/{organizerId}")
+    public ResponseEntity<?> getGamesByOrganizer(@PathVariable String organizerId) {
+        try {
+            List<Game> games = gameService.getGamesByOrganizer(organizerId);
+            return ResponseEntity.ok(games);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
 
-    // Add a specialization to an existing game
     @PostMapping("/{gameId}/specializations")
     public ResponseEntity<?> addSpecialization(
             @PathVariable String gameId,
@@ -181,6 +184,87 @@ public class GameController {
             specializationService.addSpecialization(specialization);
             return ResponseEntity.status(HttpStatus.CREATED).body("Specialization added successfully.");
         } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+
+    // Update a game
+    @PutMapping("/{gameId}/update")
+    public ResponseEntity<?> updateGame(@PathVariable String gameId, @RequestBody Game updatedGame, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
+        }
+
+        try {
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
+
+            UserProfile user = userProfileService.getUserProfileByUsername(username).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found.");
+            }
+
+            Game existingGame = gameService.getGameById(gameId);
+            if (existingGame == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found.");
+            }
+
+            // Permission check: Organizer can only modify their own games, moderators can modify any game
+            if (!user.getRole().equalsIgnoreCase("moderator") && !existingGame.getOrganizerId().equals(user.getUserId().toString())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to modify this game.");
+            }
+
+            // Update fields
+            existingGame.setName(updatedGame.getName());
+            existingGame.setType(updatedGame.getType());
+            existingGame.setDescription(updatedGame.getDescription());
+            existingGame.setYearOfExistence(updatedGame.getYearOfExistence());
+            existingGame.setPublisher(updatedGame.getPublisher());
+            existingGame.setPlatforms(updatedGame.getPlatforms());
+            existingGame.setMaxPlayersPerTeam(updatedGame.getMaxPlayersPerTeam());
+
+            gameService.updateGame(existingGame);
+            return ResponseEntity.status(HttpStatus.OK).body("Game updated successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    // Delete a game
+    @DeleteMapping("/{gameId}/delete")
+    public ResponseEntity<?> deleteGame(@PathVariable String gameId, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
+        }
+
+        try {
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
+
+            UserProfile user = userProfileService.getUserProfileByUsername(username).orElse(null);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found.");
+            }
+
+            Game existingGame = gameService.getGameById(gameId);
+            if (existingGame == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found.");
+            }
+
+            // Permission check: Organizer can delete their own games, moderators can delete any game
+            if (!user.getRole().equalsIgnoreCase("moderator") && !existingGame.getOrganizerId().equals(user.getUserId().toString())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to delete this game.");
+            }
+
+            gameService.deleteGame(gameId);
+            return ResponseEntity.status(HttpStatus.OK).body("Game deleted successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }

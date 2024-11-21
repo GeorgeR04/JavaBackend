@@ -34,5 +34,14 @@ public class GameRepository {
         query.addCriteria(Criteria.where("developer").is(developerId));
         return gameMongoTemplate.count(query, Game.class);
     }
+
+    public List<Game> findByOrganizerId(String organizerId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("organizerId").is(organizerId));
+        return gameMongoTemplate.find(query, Game.class);
+    }
+
+    public void deleteById(String gameId) {
+    }
 }
 

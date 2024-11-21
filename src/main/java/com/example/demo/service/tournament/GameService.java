@@ -19,8 +19,6 @@ public class GameService {
     public List<Game> getAllGames() {
         try {
             List<Game> games = gameRepository.findAll();
-            System.out.println("Number of games found: " + games.size());
-            System.out.println("Games: " + games);
             return games;
         } catch (Exception e) {
             System.out.println("Error fetching games: " + e.getMessage());
@@ -33,7 +31,10 @@ public class GameService {
     }
 
     public Game createGame(Game game, Long organizerId) {
-        game.setPublisher(organizerId.toString());
+        if (game.getPublisher() == null || game.getPublisher().isEmpty()) {
+            throw new IllegalArgumentException("Publisher cannot be null or empty.");
+        }
+        game.setOrganizerId(organizerId.toString()); // Associate the organizer ID
         gameRepository.save(game);
         return game;
     }
@@ -42,5 +43,16 @@ public class GameService {
         return gameRepository.countByDeveloper(String.valueOf(organizerId));
     }
 
+    public List<Game> getGamesByOrganizer(String organizerId) {
+        return gameRepository.findByOrganizerId(organizerId);
+    }
+
+    public void updateGame(Game game) {
+        gameRepository.save(game);
+    }
+
+    public void deleteGame(String gameId) {
+        gameRepository.deleteById(gameId);
+    }
 
 }
