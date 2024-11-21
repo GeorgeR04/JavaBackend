@@ -72,12 +72,14 @@ public class GameController {
     // Create a new game
     @PostMapping("/create")
     public ResponseEntity<?> createGame(@RequestBody Game game, HttpServletRequest request) {
+        // Authorization checks
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
         }
 
         try {
+            // Extract user info
             String token = authHeader.substring(7);
             String username = jwtUtil.extractUsername(token);
 
@@ -86,23 +88,65 @@ public class GameController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not found.");
             }
 
+            // Permission check
             if (!user.getRole().equalsIgnoreCase("organizer") && !user.getRole().equalsIgnoreCase("moderator")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You do not have permission to add games.");
             }
 
-            long addedGamesCount = gameService.countGamesByOrganizer(user.getUserId());
-            int maxGames = getMaxGamesByRank(user.getRank());
-            if (maxGames != -1 && addedGamesCount >= maxGames) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("You have reached the maximum number of games allowed for your rank.");
+            // Validate required fields
+            if (game.getName() == null || game.getName().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Game name is required.");
+            }
+            if (game.getType() == null || game.getType().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Game type is required.");
+            }
+            if (game.getYearOfExistence() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Year of existence is required.");
+            }
+            if (game.getPublisher() == null || game.getPublisher().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Publisher is required.");
             }
 
+            // Game creation logic
+            int maxGames = getMaxGamesByRank(user.getRank(), user.getRole());
+            if (maxGames != -1) { // If there's a limit
+                long addedGamesCount = gameService.countGamesByOrganizer(user.getUserId());
+                if (addedGamesCount >= maxGames) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("You have reached the maximum number of games allowed for your rank.");
+                }
+            }
+
+            // Save the game
             gameService.createGame(game, user.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED).body("Game created successfully.");
         } catch (Exception e) {
+            e.printStackTrace(); // Log the error for debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
+
+    private int getMaxGamesByRank(String rank, String role) {
+        // Moderators can create unlimited games
+        if (role.equalsIgnoreCase("moderator")) {
+            return -1;
+        }
+
+        // Ensure rank is valid for organizers
+        if (rank == null) {
+            throw new IllegalArgumentException("User rank cannot be null.");
+        }
+
+        switch (rank) {
+            case "D": return 3;
+            case "C": return 6;
+            case "B": return 9;
+            case "A": return 12;
+            case "S": return -1; // No limit
+            default: return 0;
+        }
+    }
+
 
     // Add a specialization to an existing game
     @PostMapping("/{gameId}/specializations")
@@ -141,15 +185,4 @@ public class GameController {
         }
     }
 
-
-    private int getMaxGamesByRank(String rank) {
-        switch (rank) {
-            case "D": return 3;
-            case "C": return 6;
-            case "B": return 9;
-            case "A": return 12;
-            case "S": return -1; // No limit
-            default: return 0;
-        }
-    }
 }

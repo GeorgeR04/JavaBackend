@@ -33,7 +33,7 @@ public class GameService {
     }
 
     public Game createGame(Game game, Long organizerId) {
-        game.setDeveloper(organizerId.toString());
+        game.setPublisher(organizerId.toString());
         gameRepository.save(game);
         return game;
     }
