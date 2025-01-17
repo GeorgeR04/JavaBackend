@@ -31,7 +31,7 @@ public class UserProfileService {
                 break;
             case 2002:
                 userProfile.setRole("player");
-                userProfile.setGame(null); // Initialize game to null
+                userProfile.setGame(null);
                 break;
             case 2003:
                 userProfile.setRole("organizer");
@@ -93,9 +93,9 @@ public class UserProfileService {
         if (userProfileOpt.isPresent()) {
             UserProfile userProfile = userProfileOpt.get();
             userProfile.setRole(newRole);
-            userProfileRepository.save(userProfile); // Update in MongoDB
+            userProfileRepository.save(userProfile);
 
-            // Synchronize with MySQL
+
             userService.synchronizeRoleToMySQL(username);
 
             return Optional.of(userProfile);

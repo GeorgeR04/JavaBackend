@@ -41,7 +41,7 @@ public class TeamController {
      * Endpoint: POST /api/teams
      * Description: Create a new team.
      */
-    // Create a new team
+
     @PostMapping
     public ResponseEntity<?> createTeam(@RequestBody Team team) {
         if (team.getName() == null || team.getName().isEmpty()) {
@@ -54,7 +54,7 @@ public class TeamController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Game ID is required.");
         }
 
-        // Create and save the team with its calculated rank
+
         Team createdTeam = teamService.createTeam(team);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTeam);
     }

@@ -29,21 +29,21 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(User user, UserProfile userProfile) {
-        // Set default authKey and encode password
+
         user.setAuthKey(2001); // Default to "member"
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Save user in MySQL
+
         User savedUser = userRepository.save(user);
         logger.info("User saved in MySQL with ID: {}", savedUser.getId());
 
-        // Populate UserProfile details
+
         userProfile.setUserId(savedUser.getId());
         userProfile.setUsername(savedUser.getUsername());
         userProfile.setFirstname(savedUser.getFirstname());
         userProfile.setLastname(savedUser.getLastname());
 
-        // Attempt to save UserProfile in MongoDB
+
         try {
             userProfileRepository.save(userProfile);
             logger.info("UserProfile saved in MongoDB for user ID: {}", savedUser.getId());
@@ -96,7 +96,7 @@ public class UserService {
     }};
 
     private int convertRoleToAuthKey(String role) {
-        return ROLE_AUTH_KEY_MAP.getOrDefault(role, -1); // -1 for undefined roles
+        return ROLE_AUTH_KEY_MAP.getOrDefault(role, -1);
     }
 
 
