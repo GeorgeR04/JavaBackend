@@ -30,7 +30,7 @@ public class Team {
     private int maxPlayers; // Maximum players allowed in the team (based on the game)
     private LocalDate dateOfExistence; // The date the team was created
     private LocalDate dateOfDisband; // The date the team was disbanded (null if active)
-
+    private boolean isTeamLeader;
     @Getter
     private List<TeamMember> members = new ArrayList<>(); // List of team members with roles
 
