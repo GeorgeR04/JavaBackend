@@ -11,18 +11,23 @@ import java.util.List;
 public class Game {
     @Id
     private String id;
-    private String name; // Name of the game
-    private String type; // Genre/type of the game (e.g., FPS, MOBA)
-    private String description; // Brief description
-    private Integer yearOfExistence; // Year the game was released
-    private String lastTournamentDate; // Date of the most recent tournament
-    private String bestPlayerId; // Best player ID
-    private String bestTeamId; // Best team ID
-    private int totalPlayers; // Total active players
-    private int maxPlayersPerTeam; // Maximum players allowed in a team for this game
-    private List<String> platforms; // Supported platforms (e.g., PC, PlayStation)
-    private String publisher; // Name of the game developer
-    private byte[] gameImage; // Game image
-    private List<String> tournamentIds; // List of tournament IDs associated with the game
-    private String organizerId; // ID of the organizer who added the game
+    private String name; // Nom du jeu
+    private String type; // Genre/type du jeu (ex : FPS, MOBA)
+    private String description; // Description brève
+    private Integer yearOfExistence; // Année de sortie du jeu
+    private String lastTournamentDate; // Date du dernier tournoi
+    private String bestPlayerId; // ID du meilleur joueur
+    private String bestTeamId; // ID de la meilleure équipe
+    private int totalPlayers; // Nombre total de joueurs actifs
+    private int maxPlayersPerTeam; // Nombre maximum de joueurs par équipe
+    private List<String> platforms; // Plateformes supportées (ex : PC, PlayStation)
+    private String publisher; // Nom du développeur/éditeur
+    private byte[] gameImage; // Image du jeu
+    private List<String> tournamentIds; // Liste des IDs des tournois associés
+    private String organizerId; // ID de l’organisateur ayant ajouté le jeu
+
+    // Nouveaux champs pour les fonctionnalités étendues
+    private Boolean approved;  // Statut d'approbation (true si le jeu est publié directement, false s'il est en attente)
+    private String rules;      // Règles détaillées du jeu
+    private String tutorial;   // URL ou texte pour les tutoriels/guide du jeu
 }

@@ -5,9 +5,10 @@ import com.example.demo.repository.mongoDB.tournament.GamesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,7 +16,7 @@ public class GameService {
 
     private final GamesRepository gamesRepository;
 
-    // Fetch all games
+    // Récupérer tous les jeux
     public List<Game> getAllGames() {
         try {
             return gamesRepository.findAll();
@@ -24,35 +25,35 @@ public class GameService {
         }
     }
 
-    // Fetch game by ID
+    // Récupérer un jeu par ID
     public Optional<Game> getGameById(String gameId) {
         return gamesRepository.findById(gameId);
     }
 
-    // Create a new game
+    // Créer un nouveau jeu
     public Game createGame(Game game, Long organizerId) {
         validateGame(game);
-        game.setOrganizerId(organizerId.toString()); // Associate the organizer ID
+        game.setOrganizerId(organizerId.toString());
         return gamesRepository.save(game);
     }
 
-    // Count games by organizer
+    // Compter les jeux par organisateur
     public long countGamesByOrganizer(Long organizerId) {
         return gamesRepository.countByOrganizerId(organizerId.toString());
     }
 
-    // Fetch games by organizer ID
+    // Récupérer les jeux par ID d’organisateur
     public List<Game> getGamesByOrganizer(String organizerId) {
         return gamesRepository.findAllByOrganizerId(organizerId);
     }
 
-    // Update an existing game
+    // Mettre à jour un jeu existant
     public Game updateGame(Game game) {
         validateGame(game);
         return gamesRepository.save(game);
     }
 
-    // Delete a game by ID
+    // Supprimer un jeu par ID
     public void deleteGame(String gameId) {
         if (!gamesRepository.existsById(gameId)) {
             throw new IllegalArgumentException("Game with ID " + gameId + " does not exist.");
@@ -60,10 +61,20 @@ public class GameService {
         gamesRepository.deleteById(gameId);
     }
 
-    // Private validation helper
+    // Nouvel endpoint : Récupérer les jeux populaires (ex. trié par nombre de joueurs)
+    public List<Game> getPopularGames() {
+        List<Game> games = getAllGames();
+        return games.stream()
+                .sorted(Comparator.comparingInt(Game::getTotalPlayers).reversed())
+                .limit(10) // Retourne les 10 jeux les plus populaires
+                .collect(Collectors.toList());
+    }
+
+    // Validation privée
     private void validateGame(Game game) {
         if (game.getPublisher() == null || game.getPublisher().isEmpty()) {
             throw new IllegalArgumentException("Publisher cannot be null or empty.");
         }
+        // Vous pouvez ajouter ici d'autres validations pour les nouveaux champs si nécessaire
     }
 }

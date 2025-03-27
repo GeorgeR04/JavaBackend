@@ -58,11 +58,14 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/tournaments/list",
-                                "/api/games",
+                                "/api/games/list",
+                                "/api/games/{gameId}",
                                 "/api/tournaments/{id}",
                                 "/api/playoffs/{tournamentId}/rounds",
                                 "/api/playoffs/{tournamentId}/structure",
-                                "/api/teams/list"
+                                "/api/teams/list",
+                                "/api/games",
+                                "/api/games/*/reviews"
                         ).permitAll()
                         // Secured endpoints
                         .requestMatchers("/api/profile", "/api/profile/**").authenticated()
@@ -73,5 +76,4 @@ public class SecurityConfig {
         http.addFilterBefore(jwtRequestFilter(userDetailsService()), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
 }

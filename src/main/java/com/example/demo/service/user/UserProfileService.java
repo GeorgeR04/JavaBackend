@@ -23,6 +23,11 @@ public class UserProfileService {
         return userProfilesRepository.findByUsername(username);
     }
 
+    // Nouvelle méthode pour récupérer le profil utilisateur par l'ID (celui stocké dans le champ userId, de type Long)
+    public UserProfile getUserProfileById(String mySqlUserId) {
+        return userProfilesRepository.findByUserId(Long.parseLong(mySqlUserId)).orElse(null);
+    }
+
     public UserProfile initializeUserProfileWithRole(UserProfile userProfile, int authKey) {
         String role = determineRoleByAuthKey(authKey);
         userProfile.setRole(role);
